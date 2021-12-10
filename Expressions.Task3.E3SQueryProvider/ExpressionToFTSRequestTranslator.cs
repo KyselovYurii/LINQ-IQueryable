@@ -33,6 +33,26 @@ namespace Expressions.Task3.E3SQueryProvider
 
                 return node;
             }
+
+            if(node.Method.DeclaringType == typeof(string))
+            {
+                switch (node.Method.Name)
+                {
+                    case "StartsWith":
+                        ProcessExpressions(node.Object, node.Arguments[0], "(", "*)");
+                        return node;
+                    case "EndsWith":
+                        ProcessExpressions(node.Object, node.Arguments[0], "(*", ")");
+                        return node;
+                    case "Contains":
+                        ProcessExpressions(node.Object, node.Arguments[0], "(*", "*)");
+                        return node;
+                    case "Equals":
+                        ProcessExpressions(node.Object, node.Arguments[0], "(", ")");
+                        return node;
+                }
+            }
+            
             return base.VisitMethodCall(node);
         }
 
@@ -58,11 +78,8 @@ namespace Expressions.Task3.E3SQueryProvider
                     {
                         throw new NotSupportedException($"The expression should consist of a Constant and a Property/Field: {node.NodeType}");
                     }
-                    
-                    Visit(member);
-                    _resultStringBuilder.Append("(");
-                    Visit(constant);
-                    _resultStringBuilder.Append(")");
+
+                    ProcessExpressions(member, constant, "(", ")");
                     break;
 
                 default:
@@ -70,6 +87,14 @@ namespace Expressions.Task3.E3SQueryProvider
             };
 
             return node;
+        }
+
+        private void ProcessExpressions(Expression firstExp, Expression secondExp, string prefix, string suffix)
+        {
+            Visit(firstExp);
+            _resultStringBuilder.Append(prefix);
+            Visit(secondExp);
+            _resultStringBuilder.Append(suffix);
         }
 
         protected override Expression VisitMember(MemberExpression node)
