@@ -41,15 +41,27 @@ namespace Expressions.Task3.E3SQueryProvider
             switch (node.NodeType)
             {
                 case ExpressionType.Equal:
-                    if (node.Left.NodeType != ExpressionType.MemberAccess)
-                        throw new NotSupportedException($"Left operand should be property or field: {node.NodeType}");
+                    Expression member;
+                    Expression constant;
 
-                    if (node.Right.NodeType != ExpressionType.Constant)
-                        throw new NotSupportedException($"Right operand should be constant: {node.NodeType}");
-
-                    Visit(node.Left);
+                    if(node.Left.NodeType == ExpressionType.Constant && node.Right.NodeType == ExpressionType.MemberAccess)
+                    {
+                        member = node.Right;
+                        constant = node.Left;
+                    }
+                    else if(node.Right.NodeType == ExpressionType.Constant && node.Left.NodeType == ExpressionType.MemberAccess)
+                    {
+                        member = node.Left;
+                        constant = node.Right;
+                    }
+                    else
+                    {
+                        throw new NotSupportedException($"The expression should consist of a Constant and a Property/Field: {node.NodeType}");
+                    }
+                    
+                    Visit(member);
                     _resultStringBuilder.Append("(");
-                    Visit(node.Right);
+                    Visit(constant);
                     _resultStringBuilder.Append(")");
                     break;
 
