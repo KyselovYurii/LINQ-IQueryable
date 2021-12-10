@@ -81,7 +81,9 @@ namespace Expressions.Task3.E3SQueryProvider
 
                     ProcessExpressions(member, constant, "(", ")");
                     break;
-
+                case ExpressionType.AndAlso:
+                    ProcessExpressions(node.Left, node.Right, " & ", string.Empty);
+                    break;
                 default:
                     throw new NotSupportedException($"Operation '{node.NodeType}' is not supported");
             };
